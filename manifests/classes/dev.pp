@@ -15,6 +15,7 @@ class apache::dev {
     name    => $operatingsystem ? {
       RedHat => "httpd-devel",
       CentOS => "httpd-devel",
+      Linux => "httpd-devel",
     },
     ensure  => present,
     require => Package["gcc"],

@@ -8,6 +8,7 @@ define apache::userdirinstance ($ensure=present, $vhost) {
     seltype => $operatingsystem ? {
       "RedHat" => "httpd_config_t",
       "CentOS" => "httpd_config_t",
+      "Linux" => "httpd_config_t",
       default  => undef,
     },
     notify => Exec["apache-graceful"],

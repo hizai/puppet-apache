@@ -23,7 +23,7 @@ define apache::namevhost ($ensure='present') {
 
   include apache::params
 
-  common::concatfilepart { "apache-namevhost.conf-${name}":
+  gnuine_common::concatfilepart { "apache-namevhost.conf-${name}":
     ensure  => $ensure,
     manage  => true,
     content => "NameVirtualHost ${name}\n",

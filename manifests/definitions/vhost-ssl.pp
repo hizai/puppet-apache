@@ -160,6 +160,7 @@ define apache::vhost-ssl (
   } else {
     $cacertfile = $operatingsystem ? {
       RedHat => "/etc/pki/tls/certs/ca-bundle.crt",
+      Linux => "/etc/pki/tls/certs/ca-bundle.crt",
       Debian => "/etc/ssl/certs/ca-certificates.crt",
     }
   }

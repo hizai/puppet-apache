@@ -39,6 +39,7 @@ define apache::redirectmatch ($ensure="present", $regex, $url, $filename="", $vh
     seltype => $operatingsystem ? {
       "RedHat" => "httpd_config_t",
       "CentOS" => "httpd_config_t",
+      "Linux" => "httpd_config_t",
       default  => undef,
     },
     name    => $filename ? {

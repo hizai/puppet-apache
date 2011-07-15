@@ -4,6 +4,8 @@ class apache::redhat inherits apache::base {
   
   # BEGIN inheritance from apache::base
   Exec["apache-graceful"] {
+    path => [
+	'/usr/sbin'],
     command => "apachectl graceful",
     onlyif  => "apachectl configtest",
   }
@@ -34,7 +36,7 @@ class apache::redhat inherits apache::base {
     mode => 755,
     owner => "root",
     group => "root",
-    source => "puppet:///apache/usr/local/sbin/a2X.redhat",
+    source => "puppet:///modules/apache/usr/local/sbin/a2X.redhat",
   }
 
   file { [
@@ -66,6 +68,7 @@ class apache::redhat inherits apache::base {
     source => $lsbmajdistrelease ? {
       5 => "puppet:///apache//etc/httpd/mods-available/redhat5/",
       6 => "puppet:///apache//etc/httpd/mods-available/redhat6/",
+      2011 => "puppet:///apache//etc/httpd/mods-available/amzn-ami/",
     },
     recurse => true,
     mode => 644,

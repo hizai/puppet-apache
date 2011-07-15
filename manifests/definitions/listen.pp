@@ -20,7 +20,7 @@ define apache::listen ($ensure='present') {
 
   include apache::params
 
-  common::concatfilepart { "apache-ports.conf-${name}":
+  gnuine_common::concatfilepart { "apache-ports.conf-${name}":
     ensure  => $ensure,
     manage  => true,
     content => "Listen ${name}\n",

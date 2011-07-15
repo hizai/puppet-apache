@@ -3,7 +3,7 @@ class apache::administration {
   include apache::params
 
   $distro_specific_apache_sudo = $operatingsystem ? {
-    /RedHat|CentOS/ => "/usr/sbin/apachectl, /sbin/service ${apache::params::pkg}",
+    /RedHat|CentOS|Linux/ => "/usr/sbin/apachectl, /sbin/service ${apache::params::pkg}",
     /Debian|Ubuntu/ => "/usr/sbin/apache2ctl",
   }
 

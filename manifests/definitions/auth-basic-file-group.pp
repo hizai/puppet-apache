@@ -33,6 +33,7 @@ define apache::auth::basic::file::group (
     seltype => $operatingsystem ? {
       "RedHat" => "httpd_config_t",
       "CentOS" => "httpd_config_t",
+      "Linux" => "httpd_config_t",
       default  => undef,
     },
     notify => Exec["apache-graceful"],
