@@ -92,5 +92,14 @@ class apache::redhat inherits apache::base {
     notify => Exec["apache-graceful"],
   }
 
+  # default redhat behavior leaves passenger.conf in conf.d directory
+  # move passenger load module file to right location
+  exec { "${apache::params::conf}/conf.d/passenger.conf":
+    path => "/usr/bin:/usr/sbin:/bin",
+    command => "mv ${apache::params::conf}/conf.d/passenger.conf ${apache::params::conf}/mods-available/passenger.load",
+    onlyif => ["test -f ${apache::params::conf}/conf.d/passenger.conf"],
+    subscribe => File["${apache::params::conf}/mods-available"],
+  }
+
 }
 
