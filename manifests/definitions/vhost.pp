@@ -56,10 +56,7 @@ define apache::vhost (
   } else {
 
     exec { "disable default virtual host from ${name}":
-      path => [
-	'/bin',
-	'/usr/bin',
-	'/usr/local/sbin'],
+      path => "/usr/local/sbin:/usr/bin:/bin",
       command => "a2dissite default",
       logoutput => true,
       onlyif  => "test -L ${apache::params::conf}/sites-enabled/000-default",
@@ -85,55 +82,129 @@ define apache::vhost (
         notify  => Exec["apache-graceful"],
       }
 
-      file { "${apache::params::root}/${name}":
-        ensure => directory,
-        owner  => root,
-        group  => root,
-        mode   => 755,
-        seltype => $operatingsystem ? {
-          redhat => "httpd_sys_content_t",
-          CentOS => "httpd_sys_content_t",
-          Linux => "httpd_sys_content_t",
-          default => undef,
-        },
-        require => File["root directory"],
+      if $docroot == false {
+        file { "${apache::params::root}/${name}":
+          ensure => directory,
+          owner  => root,
+          group  => root,
+          mode   => 755,
+          seltype => $operatingsystem ? {
+            redhat => "httpd_sys_content_t",
+            CentOS => "httpd_sys_content_t",
+            Linux => "httpd_sys_content_t",
+            default => undef,
+          },
+          require => File["root directory"],
+        }
+
+        file { "${apache::params::root}/${name}/conf":
+          ensure => directory,
+          owner  => $admin ? {
+            "" => $wwwuser,
+            default => $admin,
+          },
+          group  => $group,
+          mode   => $mode,
+          seltype => $operatingsystem ? {
+            redhat => "httpd_config_t",
+            CentOS => "httpd_config_t",
+            Linux => "httpd_config_t",
+            default => undef,
+          },
+          require => [File["${apache::params::root}/${name}"]],
+        }
+
+        file { "${apache::params::root}/${name}/htdocs":
+          ensure => directory,
+          owner  => $wwwuser,
+          group  => $group,
+          mode   => $mode,
+          seltype => $operatingsystem ? {
+            redhat => "httpd_sys_content_t",
+            CentOS => "httpd_sys_content_t",
+            Linux => "httpd_sys_content_t",
+            default => undef,
+          },
+          require => [File["${apache::params::root}/${name}"]],
+        }
+
+        # Log files
+        file {"${apache::params::root}/${name}/logs":
+          ensure => directory,
+          owner  => root,
+          group  => root,
+          mode   => 755,
+          seltype => $operatingsystem ? {
+            redhat => "httpd_log_t",
+            CentOS => "httpd_log_t",
+            Linux => "httpd_log_t",
+            default => undef,
+          },
+          require => File["${apache::params::root}/${name}"],
+        }
+
+        # We have to give log files to right people with correct rights on them.
+        # Those rights have to match those set by logrotate
+        file { ["${apache::params::root}/${name}/logs/access.log",
+                "${apache::params::root}/${name}/logs/error.log"] :
+          ensure => present,
+          owner => root,
+          group => adm,
+          mode => 644,
+          seltype => $operatingsystem ? {
+            redhat => "httpd_log_t",
+            CentOS => "httpd_log_t",
+            Linux => "httpd_log_t",
+            default => undef,
+          },
+          require => File["${apache::params::root}/${name}/logs"],
+        }
+
+        # Private data
+        file {"${apache::params::root}/${name}/private":
+          ensure  => directory,
+          owner   => $wwwuser,
+          group   => $group,
+          mode    => $mode,
+          seltype => $operatingsystem ? {
+            redhat => "httpd_sys_content_t",
+            CentOS => "httpd_sys_content_t",
+            Linux => "httpd_sys_content_t",
+            default => undef,
+          },
+          require => File["${apache::params::root}/${name}"],
+        }
+
+        # README file
+        file {"${apache::params::root}/${name}/README":
+          ensure  => present,
+          owner   => root,
+          group   => root,
+          mode    => 644,
+          content => $readme ? {
+            false => template("apache/README_vhost.erb"),
+            default => $readme,
+          },
+          require => File["${apache::params::root}/${name}"],
+        }
+
       }
 
-      file { "${apache::params::root}/${name}/conf":
-        ensure => directory,
-        owner  => $admin ? {
-          "" => $wwwuser,
-          default => $admin,
-        },
-        group  => $group,
-        mode   => $mode,
-        seltype => $operatingsystem ? {
-          redhat => "httpd_config_t",
-          CentOS => "httpd_config_t",
-          Linux => "httpd_config_t",
-          default => undef,
-        },
-        require => [File["${apache::params::root}/${name}"]],
-      }
 
-      file { "${apache::params::root}/${name}/htdocs":
-        ensure => directory,
-        owner  => $wwwuser,
-        group  => $group,
-        mode   => $mode,
-        seltype => $operatingsystem ? {
-          redhat => "httpd_sys_content_t",
-          CentOS => "httpd_sys_content_t",
-          Linux => "httpd_sys_content_t",
-          default => undef,
-        },
-        require => [File["${apache::params::root}/${name}"]],
-      }
- 
       if $htdocs {
-        File["${apache::params::root}/${name}/htdocs"] {
-          source  => $htdocs,
-          recurse => true,
+        case $docroot {
+          false: {
+            File["${apache::params::root}/${name}/htdocs"] {
+              source  => $htdocs,
+              recurse => true,
+            }
+          }
+          default: {
+            File["${apache::params::root}/${name}/$documentroot"] {
+              source  => $htdocs,
+              recurse => true,
+            }
+          }
         }
       }
 
@@ -144,26 +215,28 @@ define apache::vhost (
         }
       }
 
-      # cgi-bin
-      file { "${name} cgi-bin directory":
-        path   => $cgipath ? {
-          false   => "${apache::params::root}/${name}/cgi-bin/",
-          default => $cgipath,
-        },
-        ensure => $cgipath ? {
-          "${apache::params::root}/${name}/cgi-bin/" => directory,
-          default => undef, # don't manage this directory unless under $root/$name
-        },
-        owner  => $wwwuser,
-        group  => $group,
-        mode   => $mode,
-        seltype => $operatingsystem ? {
-          redhat => "httpd_sys_script_exec_t",
-          CentOS => "httpd_sys_script_exec_t",
-          Linux => "httpd_sys_script_exec_t",
-          default => undef,
-        },
-        require => [File["${apache::params::root}/${name}"]],
+      if $cgibin {
+        # cgi-bin
+        file { "${name} cgi-bin directory":
+          path   => $cgipath ? {
+            false   => "${apache::params::root}/${name}/cgi-bin/",
+            default => $cgipath,
+          },
+          ensure => $cgipath ? {
+            "${apache::params::root}/${name}/cgi-bin/" => directory,
+            default => undef, # don't manage this directory unless under $root/$name
+          },
+          owner  => $wwwuser,
+          group  => $group,
+          mode   => $mode,
+          seltype => $operatingsystem ? {
+            redhat => "httpd_sys_script_exec_t",
+            CentOS => "httpd_sys_script_exec_t",
+            Linux => "httpd_sys_script_exec_t",
+            default => undef,
+          },
+          require => [File["${apache::params::root}/${name}"]],
+        }
       }
 
       case $config_file {
@@ -171,6 +244,18 @@ define apache::vhost (
         default: {
           File["${apache::params::conf}/sites-available/${name}"] {
             source => $config_file,
+          }
+        }
+        "template": {
+          if $config_content {
+            File["${apache::params::conf}/sites-available/${name}"] {
+              content => template($config_content),
+            }
+          } else {
+            # default vhost template
+            File["${apache::params::conf}/sites-available/${name}"] {
+              content => template("apache/vhost.erb"),
+            }
           }
         }
         "": {
@@ -188,66 +273,6 @@ define apache::vhost (
         }
       }
 
-      # Log files
-      file {"${apache::params::root}/${name}/logs":
-        ensure => directory,
-        owner  => root,
-        group  => root,
-        mode   => 755,
-        seltype => $operatingsystem ? {
-          redhat => "httpd_log_t",
-          CentOS => "httpd_log_t",
-          Linux => "httpd_log_t",
-          default => undef,
-        },
-        require => File["${apache::params::root}/${name}"],
-      }
-
-      # We have to give log files to right people with correct rights on them.
-      # Those rights have to match those set by logrotate
-      file { ["${apache::params::root}/${name}/logs/access.log",
-              "${apache::params::root}/${name}/logs/error.log"] :
-        ensure => present,
-        owner => root,
-        group => adm,
-        mode => 644,
-        seltype => $operatingsystem ? {
-          redhat => "httpd_log_t",
-          CentOS => "httpd_log_t",
-          Linux => "httpd_log_t",
-          default => undef,
-        },
-        require => File["${apache::params::root}/${name}/logs"],
-      }
-
-      # Private data
-      file {"${apache::params::root}/${name}/private":
-        ensure  => directory,
-        owner   => $wwwuser,
-        group   => $group,
-        mode    => $mode,
-        seltype => $operatingsystem ? {
-          redhat => "httpd_sys_content_t",
-          CentOS => "httpd_sys_content_t",
-          Linux => "httpd_sys_content_t",
-          default => undef,
-        },
-        require => File["${apache::params::root}/${name}"],
-      }
-
-      # README file
-      file {"${apache::params::root}/${name}/README":
-        ensure  => present,
-        owner   => root,
-        group   => root,
-        mode    => 644,
-        content => $readme ? {
-          false => template("apache/README_vhost.erb"),
-          default => $readme,
-        },
-        require => File["${apache::params::root}/${name}"],
-      }
-
       exec {"enable vhost ${name}":
         command => $operatingsystem ? {
           RedHat => "/usr/local/sbin/a2ensite ${name}",
@@ -262,9 +287,9 @@ define apache::vhost (
           Linux => File["/usr/local/sbin/a2ensite"],
           default => Package[$apache::params::pkg]},
           File["${apache::params::conf}/sites-available/${name}"],
-          File["${apache::params::root}/${name}/htdocs"],
-          File["${apache::params::root}/${name}/logs"],
-          File["${apache::params::root}/${name}/conf"]
+          #File["${apache::params::root}/${name}/htdocs"],
+          #File["${apache::params::root}/${name}/logs"],
+          #File["${apache::params::root}/${name}/conf"]
         ],
         unless  => "/bin/sh -c '[ -L ${apache::params::conf}/sites-enabled/${name} ] \\
           && [ ${apache::params::conf}/sites-enabled/${name} -ef ${apache::params::conf}/sites-available/${name} ]'",
@@ -283,6 +308,7 @@ define apache::vhost (
       }
 
       exec { "remove ${apache::params::root}/${name}":
+        path => "/usr/bin:/bin",
         command => "rm -rf ${apache::params::root}/${name}",
         onlyif  => "test -d ${apache::params::root}/${name}",
         require => Exec["disable vhost ${name}"],
