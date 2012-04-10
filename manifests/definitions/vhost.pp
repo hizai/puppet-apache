@@ -75,6 +75,7 @@ define apache::vhost (
         seltype => $operatingsystem ? {
           redhat => "httpd_config_t",
           CentOS => "httpd_config_t",
+          Amazon => "httpd_config_t",
           Linux => "httpd_config_t",
           default => undef,
         },
@@ -91,6 +92,7 @@ define apache::vhost (
           seltype => $operatingsystem ? {
             redhat => "httpd_sys_content_t",
             CentOS => "httpd_sys_content_t",
+            Amazon => "httpd_sys_content_t",
             Linux => "httpd_sys_content_t",
             default => undef,
           },
@@ -108,6 +110,7 @@ define apache::vhost (
           seltype => $operatingsystem ? {
             redhat => "httpd_config_t",
             CentOS => "httpd_config_t",
+            Amazon => "httpd_config_t",
             Linux => "httpd_config_t",
             default => undef,
           },
@@ -122,6 +125,7 @@ define apache::vhost (
           seltype => $operatingsystem ? {
             redhat => "httpd_sys_content_t",
             CentOS => "httpd_sys_content_t",
+            Amazon => "httpd_sys_content_t",
             Linux => "httpd_sys_content_t",
             default => undef,
           },
@@ -137,6 +141,7 @@ define apache::vhost (
           seltype => $operatingsystem ? {
             redhat => "httpd_log_t",
             CentOS => "httpd_log_t",
+            Amazon => "httpd_log_t",
             Linux => "httpd_log_t",
             default => undef,
           },
@@ -154,6 +159,7 @@ define apache::vhost (
           seltype => $operatingsystem ? {
             redhat => "httpd_log_t",
             CentOS => "httpd_log_t",
+            Amazon => "httpd_log_t",
             Linux => "httpd_log_t",
             default => undef,
           },
@@ -169,6 +175,7 @@ define apache::vhost (
           seltype => $operatingsystem ? {
             redhat => "httpd_sys_content_t",
             CentOS => "httpd_sys_content_t",
+            Amazon => "httpd_sys_content_t",
             Linux => "httpd_sys_content_t",
             default => undef,
           },
@@ -232,6 +239,7 @@ define apache::vhost (
           seltype => $operatingsystem ? {
             redhat => "httpd_sys_script_exec_t",
             CentOS => "httpd_sys_script_exec_t",
+            Amazon => "httpd_sys_script_exec_t",
             Linux => "httpd_sys_script_exec_t",
             default => undef,
           },
@@ -277,6 +285,7 @@ define apache::vhost (
         command => $operatingsystem ? {
           RedHat => "/usr/local/sbin/a2ensite ${name}",
           CentOS => "/usr/local/sbin/a2ensite ${name}",
+          Amazon => "/usr/local/sbin/a2ensite ${name}",
           Linux => "/usr/local/sbin/a2ensite ${name}",
           default => "/usr/sbin/a2ensite ${name}"
         },
@@ -284,6 +293,7 @@ define apache::vhost (
         require => [$operatingsystem ? {
           redhat => File["/usr/local/sbin/a2ensite"],
           CentOS => File["/usr/local/sbin/a2ensite"],
+          Amazon => File["/usr/local/sbin/a2ensite"],
           Linux => File["/usr/local/sbin/a2ensite"],
           default => Package[$apache::params::pkg]},
           File["${apache::params::conf}/sites-available/${name}"],
@@ -318,6 +328,7 @@ define apache::vhost (
         command => $operatingsystem ? {
           RedHat => "/usr/local/sbin/a2dissite ${name}",
           CentOS => "/usr/local/sbin/a2dissite ${name}",
+          Amazon => "/usr/local/sbin/a2dissite ${name}",
           Linux => "/usr/local/sbin/a2dissite ${name}",
           default => "/usr/sbin/a2dissite ${name}"
         },
@@ -325,6 +336,7 @@ define apache::vhost (
         require => [$operatingsystem ? {
           redhat => File["/usr/local/sbin/a2ensite"],
           CentOS => File["/usr/local/sbin/a2ensite"],
+          Amazon => File["/usr/local/sbin/a2ensite"],
           Linux => File["/usr/local/sbin/a2ensite"],
           default => Package[$apache::params::pkg]}],
         onlyif => "/bin/sh -c '[ -L ${apache::params::conf}/sites-enabled/${name} ] \\

@@ -2,7 +2,7 @@ class apache::security {
 
   case $operatingsystem {
 
-    RedHat,CentOS,Linux: {
+    RedHat,CentOS,Amazon,Linux: {
       package { "mod_security":
         ensure => present,
         alias => "apache-mod_security",

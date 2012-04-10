@@ -19,7 +19,7 @@ Example usage:
 class apache {
   case $operatingsystem {
     Debian,Ubuntu:  { include apache::debian}
-    RedHat,CentOS,Linux:  { include apache::redhat}
+    RedHat,CentOS,Amazon,Linux:  { include apache::redhat}
     default: { notice "Unsupported operatingsystem ${operatingsystem}" }
   }
 }
@@ -58,7 +58,7 @@ Example usage:
 class apache::ssl inherits apache {
   case $operatingsystem {
     Debian,Ubuntu:  { include apache::ssl::debian}
-    RedHat,CentOS,Linux:  { include apache::ssl::redhat}
+    RedHat,CentOS,Amazon,Linux:  { include apache::ssl::redhat}
     default: { notice "Unsupported operatingsystem ${operatingsystem}" }
   }
 }

@@ -30,7 +30,7 @@ class apache::awstats {
       }
     }
 
-    RedHat,CentOS,Linux: {
+    RedHat,CentOS,Amazon,Linux: {
 
       # awstats RPM installs its own cron in /etc/cron.hourly/awstats
 

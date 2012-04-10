@@ -32,6 +32,7 @@ define apache::auth::basic::file::user (
     seltype => $operatingsystem ? {
       "RedHat" => "httpd_config_t",
       "CentOS" => "httpd_config_t",
+      "Amazon" => "httpd_config_t",
       "Linux" => "httpd_config_t",
       default  => undef,
     },
