@@ -69,6 +69,7 @@ class apache::redhat inherits apache::base {
       5 => "puppet:///apache//etc/httpd/mods-available/redhat5/",
       6 => "puppet:///apache//etc/httpd/mods-available/redhat6/",
       2011 => "puppet:///apache//etc/httpd/mods-available/amzn-ami/",
+      2012 => "puppet:///apache//etc/httpd/mods-available/amzn-ami/",
     },
     recurse => true,
     mode => 644,
