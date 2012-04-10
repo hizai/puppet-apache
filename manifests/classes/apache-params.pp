@@ -19,7 +19,7 @@ class apache::params {
   }
 
   $conf = $operatingsystem ? {
-    /RedHat|CentOS|Amazno|Linux/ => '/etc/httpd',
+    /RedHat|CentOS|Amazon|Linux/ => '/etc/httpd',
     /Debian|Ubuntu/ => '/etc/apache2',
   }
 
