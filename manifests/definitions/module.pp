@@ -23,6 +23,7 @@ define apache::module ($ensure='present') {
         command => $operatingsystem ? {
           RedHat => "/usr/local/sbin/a2enmod ${name}",
           CentOS => "/usr/local/sbin/a2enmod ${name}",
+          Amazon => "/usr/local/sbin/a2enmod ${name}",
           Linux => "/usr/local/sbin/a2enmod ${name}",
           default => "/usr/sbin/a2enmod ${name}"
         },
