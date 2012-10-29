@@ -6,6 +6,12 @@ class apache::params {
     /Debian|Ubuntu/ => 'apache2',
   }
 
+  $service = $operatingsystem ? {
+    /RedHat|CentOS/ => 'httpd',
+    /Linux/ => 'httpd',
+    /Debian|Ubuntu/ => 'apache2',
+  }
+
   $root = $apache_root ? {
     "" => $operatingsystem ? {
       /RedHat|CentOS|Amazon|Linux/ => '/var/www/vhosts',
