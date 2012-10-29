@@ -2,7 +2,7 @@ class apache::params {
 
   $pkg = $operatingsystem ? {
     /RedHat|CentOS/ => 'httpd',
-    /Linux/ => 'httpd24'
+    /Linux/ => 'httpd24',
     /Debian|Ubuntu/ => 'apache2',
   }
 
