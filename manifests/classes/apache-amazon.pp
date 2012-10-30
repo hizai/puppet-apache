@@ -63,12 +63,14 @@ class apache::amazon inherits apache::base {
   # the following command was used to generate the content of the directory:
   # egrep '(^|#)LoadModule' /etc/httpd/conf/httpd.conf | sed -r 's|#?(.+ (.+)_module .+)|echo "\1" > mods-available/redhat5/\2.load|' | sh
   # ssl.load was then changed to a template (see apache-ssl-redhat.pp)
+  case $apache::params::pkg {
+    /^httpd$/: { $modules_dir = "puppet:///apache//etc/httpd/mods-available/amzn-ami/"}
+    /^httpd24$/: { $modules_dir = "puppet:///apache//etc/httpd/mods-available/amzn-ami-24/"}
+  }
+
   file { "${apache::params::conf}/mods-available":
     ensure => directory,
-    source => $pkg ? {
-      /^httpd$/ => "puppet:///apache//etc/httpd/mods-available/amzn-ami/",
-      /^httpd24$/ => "puppet:///apache//etc/httpd/mods-available/amzn-ami-24/",
-    },
+    source => $modules_dir,
     recurse => true,
     mode => 644,
     owner => "root",
