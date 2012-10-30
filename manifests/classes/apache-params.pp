@@ -10,7 +10,7 @@ class apache::params {
   case $lsbdistid {
     /CentOS|RedHat/: { $pkg = 'httpd' }
     /Debian|Ubuntu/: { $pkg = 'apache2'}
-    /AmazonAMI/: { if ($year < 2012) or (($year == 2012) and ($month < 09)) { $pkg = 'httpd' } else { $pkg = 'httpd24' } }
+    /AmazonAMI/: { if ($year < 2012) or (($year == 2012) and ($month < 09)) { $pkg = 'httpd' } else { $pkg = 'httpd' } }
   }
 
   $service = $operatingsystem ? {
