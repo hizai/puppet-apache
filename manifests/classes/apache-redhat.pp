@@ -100,5 +100,10 @@ class apache::redhat inherits apache::base {
     subscribe => File["${apache::params::conf}/mods-available"],
   }
 
+  apache::module {["authz_default"]:
+    ensure => present,
+    notify => Exec["apache-graceful"],
+  }
+
 }
 
