@@ -1,4 +1,4 @@
-class apache::redhat inherits apache::base {
+class apache::amazon inherits apache::base {
 
   include apache::params
   
@@ -65,9 +65,9 @@ class apache::redhat inherits apache::base {
   # ssl.load was then changed to a template (see apache-ssl-redhat.pp)
   file { "${apache::params::conf}/mods-available":
     ensure => directory,
-    source => $lsbmajdistrelease ? {
-      5 => "puppet:///apache//etc/httpd/mods-available/redhat5/",
-      6 => "puppet:///apache//etc/httpd/mods-available/redhat6/",
+    source => $pkg ? {
+      /^httpd$/ => "puppet:///apache//etc/httpd/mods-available/amzn-ami/",
+      /^httpd24$/ => "puppet:///apache//etc/httpd/mods-available/amzn-ami-24/",
     },
     recurse => true,
     mode => 644,

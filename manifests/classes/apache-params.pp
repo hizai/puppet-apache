@@ -1,9 +1,16 @@
 class apache::params {
 
-  $pkg = $operatingsystem ? {
-    /RedHat|CentOS/ => 'httpd',
-    /Linux/ => 'httpd24',
-    /Debian|Ubuntu/ => 'apache2',
+  if $lsbdistid == 'AmazonAMI' {
+    if $lsbdistrelease =~ /^([0-9]){4}\.([0-9]){2}$/ {
+      $year = $1
+      $month = $2
+    }
+  }
+
+  case $lsbdistid {
+    /CentOS|RedHat/: { $pkg = 'httpd' }
+    /Debian|Ubuntu/: { $pkg = 'apache2'}
+    /AmazonAMI/: { if ($year < 2012) or (($year == 2012) and ($month < 09)) { $pkg = 'httpd' } else { $pkg = 'httpd24' } }
   }
 
   $service = $operatingsystem ? {
