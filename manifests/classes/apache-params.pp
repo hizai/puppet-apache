@@ -15,7 +15,7 @@ class apache::params {
 
   $service = $operatingsystem ? {
     /RedHat|CentOS/ => 'httpd',
-    /Linux/ => 'httpd',
+    /Linux|Amazon/ => 'httpd',
     /Debian|Ubuntu/ => 'apache2',
   }
 
