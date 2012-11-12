@@ -19,7 +19,7 @@ define apache::server ($config_template = "apache/httpd.conf.erb",
       command => "sed -i s/\\#HTTPD=/HTTPD=/ /etc/sysconfig/httpd",
       path => "/usr/local/bin:/bin:/usr/bin",
       onlyif => "[ -s /etc/sysconfig/httpd ] && grep \\#HTTPD= /etc/sysconfig/httpd",
-      notify => Exec["apache_restart"], 
+      notify => Exec["apache-graceful"], 
     }
   }
   elsif $mpm == 'prefork' {
@@ -27,7 +27,7 @@ define apache::server ($config_template = "apache/httpd.conf.erb",
       command => "sed -i s/HTTPD=/\\#HTTPD=/ /etc/sysconfig/httpd",
       path => "/usr/local/bin:/bin:/usr/bin",
       onlyif => "[ -s /etc/sysconfig/httpd ] && cat /etc/sysconfig/httpd | grep ^HTTPD=",
-      notify => Exec["apache_restart"], 
+      notify => Exec["apache-graceful"], 
     }
   }
 
@@ -35,10 +35,5 @@ define apache::server ($config_template = "apache/httpd.conf.erb",
     content => template("${config_template}"),
   }
   
-  exec { "apache_restart":
-    command => "/etc/init.d/${apache::params::pkg} restart",
-    refreshonly => true
-  }
-
 }
 
