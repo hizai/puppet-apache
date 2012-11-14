@@ -10,9 +10,9 @@ class apache::amazon inherits apache::base {
     onlyif  => "apachectl configtest",
   }
 
-  Package["apache"] {
-    require => [File["/usr/local/sbin/a2ensite"], File["/usr/local/sbin/a2dissite"], File["/usr/local/sbin/a2enmod"], File["/usr/local/sbin/a2dismod"]],
-  }
+  #Package["apache"] {
+  #  require => [File["/usr/local/sbin/a2ensite"], File["/usr/local/sbin/a2dissite"], File["/usr/local/sbin/a2enmod"], File["/usr/local/sbin/a2dismod"]],
+  #}
 
   File["logrotate configuration"] { 
     path => "/etc/logrotate.d/httpd",
@@ -37,6 +37,12 @@ class apache::amazon inherits apache::base {
     owner => "root",
     group => "root",
     source => "puppet:///modules/apache/usr/local/sbin/a2X.redhat",
+    require => [
+      File["${apache::params::conf}/sites-available"],
+      File["${apache::params::conf}/sites-enabled"],
+      File["${apache::params::conf}/mods-enabled"],
+      File["${apache::params::conf}/mods-available"]
+    ]
   }
 
   file { [
